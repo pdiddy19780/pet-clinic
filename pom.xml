@@ -208,9 +208,43 @@
 			<optional>true</optional>
 		</dependency>
 	</dependencies>
-
+      stage('Dependency check') {
+          steps {
+              sh "mvn --batch-mode dependency-check:check"
+          }
+          post {
+              always {
+                  publishHTML(target:[
+                      allowMissing: true,
+                      alwaysLinkToLastBuild: true,
+                      keepAll: true,
+                      reportDir: 'target',
+                      reportFiles: 'dependency-check-report.html',
+                      reportName: "OWASP Dependency Check Report"
+                  ])
+              }
+          }
+      }
 	<build>
 		<plugins>
+			             <plugin>
+                <groupId>org.owasp</groupId>
+                <artifactId>dependency-check-maven</artifactId>
+                <version>5.3.0</version>
+                <configuration>
+                    <format>ALL</format>
+                    <failBuildOnCVSS>7</failBuildOnCVSS>
+                    <cveValidForHours>168</cveValidForHours>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
